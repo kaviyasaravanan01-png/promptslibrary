@@ -12,7 +12,7 @@ export default async function MarketplacePage({ searchParams }: Props) {
   let results: any[] = [];
   // Dynamically determine base URL for API calls
   // let baseUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
-  let baseUrl:any='http://localhost:3000';
+  let baseUrl:any='https://promptslibrary-nine.vercel.app';
   // if (typeof window !== 'undefined') {
   //   if (window.location.hostname === 'localhost') {
   //     baseUrl = 'http://localhost:3000';
