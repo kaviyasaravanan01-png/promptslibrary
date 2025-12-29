@@ -9,12 +9,17 @@ type CatSel = { category_id?: string; subcategory_id?: string; subsub_id?: strin
 
 export default function PromptGridWithFilter({ prompts }: { prompts: any[] }) {
   const [user, setUser] = useState<any>(null);
-  const [displayed, setDisplayed] = useState<any[]>(prompts || []);
+  const [displayed, setDisplayed] = useState<any[]>(Array.isArray(prompts) ? prompts : []);
   const [onlyFavs, setOnlyFavs] = useState(false);
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
   const [catSel, setCatSel] = useState<CatSel>({});
-
+  useEffect(() => {
+    // Always update displayed when prompts prop changes
+    if (!onlyFavs) {
+      setDisplayed(Array.isArray(prompts) ? prompts : []);
+    }
+  }, [prompts, onlyFavs]);
   useEffect(() => {
     let subscription: any;
     const init = async () => {
@@ -28,10 +33,7 @@ export default function PromptGridWithFilter({ prompts }: { prompts: any[] }) {
   }, []);
 
   useEffect(() => {
-    if (!onlyFavs) {
-      setDisplayed(prompts || []);
-      return;
-    }
+    if (!onlyFavs) return;
     const fetchFavs = async () => {
       if (!user) {
         alert('Please sign in to see your favorites');
@@ -47,12 +49,13 @@ export default function PromptGridWithFilter({ prompts }: { prompts: any[] }) {
       setLoading(false);
     };
     fetchFavs();
-  }, [onlyFavs, user, prompts]);
-
-  useEffect(() => { fetch('/api/categories').then(r=>r.json()).then(d=>setCategories(d.categories||[])); }, []);
+  }, [onlyFavs, user]);
 
   const applyCategory = async () => {
-    if (!catSel.category_id) return setDisplayed(prompts || []);
+    if (!catSel.category_id) {
+      setDisplayed(prompts || []);
+      return;
+    }
     setLoading(true);
     const params = new URLSearchParams();
     params.set('categoryId', catSel.category_id || '');
@@ -97,11 +100,15 @@ export default function PromptGridWithFilter({ prompts }: { prompts: any[] }) {
         {loading && <div className="text-sm text-gray-400">Loading...</div>}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {(displayed || []).map((p: any) => (
-          <PromptCard key={p.id} prompt={p} />
-        ))}
-      </div>
+      {displayed.length === 0 ? (
+        <div className="text-center text-gray-400 py-12 text-lg">No results found. Try a different search or filter.</div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {displayed.map((p: any) => (
+            <PromptCard key={p.id} prompt={p} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

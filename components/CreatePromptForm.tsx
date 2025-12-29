@@ -10,6 +10,11 @@ export default function CreatePromptForm({ initial, onSaved }: { initial?: any, 
   const [slug, setSlug] = useState(initial?.slug || '');
   const [description, setDescription] = useState(initial?.description || '');
   const [promptText, setPromptText] = useState(initial?.prompt_text || '');
+  const [requirementsText, setRequirementsText] = useState((initial?.requirements || []).join('\n') || '');
+  const [instructionsText, setInstructionsText] = useState((initial?.instructions || []).join('\n') || '');
+  const [seoTitle, setSeoTitle] = useState(initial?.seo_title || '');
+  const [seoDescription, setSeoDescription] = useState(initial?.seo_description || '');
+  const [prevTitle, setPrevTitle] = useState(initial?.title || '');
   const [loading, setLoading] = useState(false);
   const [categoriesTree, setCategoriesTree] = useState<any[]>([]);
   const [selections, setSelections] = useState<CatSelection[]>([{}]);
@@ -19,6 +24,15 @@ export default function CreatePromptForm({ initial, onSaved }: { initial?: any, 
   useEffect(() => {
     fetch('/api/categories').then(r => r.json()).then(d => setCategoriesTree(d.categories || []));
   }, []);
+
+  // keep SEO title prefilled with prompt title unless user edits it
+  useEffect(() => {
+    if (!seoTitle || seoTitle === prevTitle) {
+      setSeoTitle(title);
+    }
+    setPrevTitle(title);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [title]);
 
   const addSelection = () => {
     if (selections.length >= 3) return alert('Max 3 category selections');
@@ -108,7 +122,10 @@ export default function CreatePromptForm({ initial, onSaved }: { initial?: any, 
 
     const catsPayload = selections.map(s => ({ category_id: s.category_id, subcategory_id: s.subcategory_id, subsub_id: s.subsub_id }));
 
-    const payload = { title, slug, description, prompt_text: promptText, result_urls, categories: catsPayload };
+    const requirements = (requirementsText || '').split('\n').map(s => s.trim()).filter(Boolean);
+    const instructions = (instructionsText || '').split('\n').map(s => s.trim()).filter(Boolean);
+
+    const payload = { title, slug, description, prompt_text: promptText, result_urls, categories: catsPayload, requirements, instructions, seo_title: seoTitle, seo_description: seoDescription };
     const res = await fetch('/api/prompts/create', { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` }, body: JSON.stringify(payload) });
     let json: any = {};
     try {
@@ -141,6 +158,26 @@ export default function CreatePromptForm({ initial, onSaved }: { initial?: any, 
       <div>
         <label className="block text-sm">Prompt Text</label>
         <textarea value={promptText} onChange={e => setPromptText(e.target.value)} rows={6} className="w-full p-2 bg-black/20 rounded" />
+      </div>
+
+      <div>
+        <label className="block text-sm">Requirements (one per line, optional)</label>
+        <textarea value={requirementsText} onChange={e => setRequirementsText(e.target.value)} rows={3} className="w-full p-2 bg-black/20 rounded" />
+      </div>
+
+      <div>
+        <label className="block text-sm">Instructions / Steps (one per line, optional)</label>
+        <textarea value={instructionsText} onChange={e => setInstructionsText(e.target.value)} rows={4} className="w-full p-2 bg-black/20 rounded" />
+      </div>
+
+      <div>
+        <label className="block text-sm">SEO Title (optional)</label>
+        <input value={seoTitle} onChange={e => setSeoTitle(e.target.value)} className="w-full p-2 bg-black/20 rounded" />
+      </div>
+
+      <div>
+        <label className="block text-sm">SEO Description (optional)</label>
+        <textarea value={seoDescription} onChange={e => setSeoDescription(e.target.value)} rows={2} className="w-full p-2 bg-black/20 rounded" />
       </div>
 
       <div>

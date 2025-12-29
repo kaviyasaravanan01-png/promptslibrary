@@ -9,11 +9,11 @@ export async function GET(req: Request) {
   if (!slug) return NextResponse.json({ error: 'slug required' }, { status: 400 });
 
   // fetch prompt row
-  const { data: prompt } = await supabaseAdmin.from('prompts').select('id,is_premium,prompt_text,price').eq('slug', slug).single();
+  const { data: prompt } = await supabaseAdmin.from('prompts').select('id,is_premium,prompt_text,price,requirements,instructions').eq('slug', slug).single();
   if (!prompt) return NextResponse.json({ error: 'not found' }, { status: 404 });
 
   if (!prompt.is_premium) {
-    return NextResponse.json({ prompt_text: prompt.prompt_text });
+    return NextResponse.json({ prompt_text: prompt.prompt_text, requirements: prompt.requirements || [], instructions: prompt.instructions || [] });
   }
 
   // if premium, require Authorization header with bearer token to identify user
@@ -34,8 +34,7 @@ export async function GET(req: Request) {
   const { data: purchase } = await supabaseAdmin.from('purchases').select('*').eq('user_id', userId).eq('prompt_id', prompt.id).eq('status', 'completed').single();
 
   if (purchase) {
-    return NextResponse.json({ prompt_text: prompt.prompt_text });
+    return NextResponse.json({ prompt_text: prompt.prompt_text, requirements: prompt.requirements || [], instructions: prompt.instructions || [] });
   }
-
-  return NextResponse.json({ locked: true }, { status: 402 });
+  return NextResponse.json({ locked: true, requirements: prompt.requirements || [], instructions: prompt.instructions || [] }, { status: 402 });
 }

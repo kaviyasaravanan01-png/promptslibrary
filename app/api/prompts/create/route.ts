@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     console.log('[prompts/create] invoked by', userData.user.id, userData.user.email);
 
     const body = await req.json();
-    const { title, description, model, prompt_text, result_urls, slug, categories } = body;
+    const { title, description, model, prompt_text, result_urls, slug, categories, requirements, instructions, seo_title, seo_description } = body;
     if (!title || !slug) return NextResponse.json({ error: 'title and slug required' }, { status: 400 });
 
     // validate result_urls: array of { type: 'image'|'video'|'audio'|'scenario', url }
@@ -45,6 +45,10 @@ export async function POST(req: Request) {
       model: model || null,
       prompt_text: prompt_text || null,
       result_urls: result_urls || null,
+      requirements: Array.isArray(requirements) ? requirements : null,
+      instructions: Array.isArray(instructions) ? instructions : null,
+      seo_title: seo_title || null,
+      seo_description: seo_description || null,
       is_premium: false,
       price: 0,
       created_by: userData.user.id,

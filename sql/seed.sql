@@ -5,7 +5,7 @@ INSERT INTO profiles (id, full_name, avatar_url)
 VALUES ('11111111-1111-1111-1111-111111111111', 'Seed Admin', 'https://rdjkjtrgicxhjvwuofmy.supabase.co/storage/v1/object/public/results/amazon_digital_signature.jpg')
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO prompts (slug, title, description, model, result_urls, is_premium, price, prompt_text, created_by)
+INSERT INTO prompts (slug, title, description, model, result_urls, is_premium, price, prompt_text, requirements, instructions, created_by)
 VALUES (
   'sample-prompt',
   'Sample Prompt — MidJourney',
@@ -15,6 +15,10 @@ VALUES (
   true,
   1000,
   'Write a creative prompt that instructs MidJourney to make a dramatic product photo with neon reflections.',
+  ARRAY['Use a dark studio background','Include reflective surfaces','Emphasize neon lighting accents']::text[],
+  ARRAY['Compose subject centrally','Use dramatic low-angle lighting','Post-process for color grading']::text[],
+  'Sample Prompt — MidJourney — Neon product photo',
+  'A short SEO description: creative MidJourney prompt for neon-lit product photography.',
   '11111111-1111-1111-1111-111111111111'
 );
 

@@ -64,7 +64,9 @@ export default function MyPromptsPage() {
             <PromptCard prompt={p} />
             <div className="mt-2 flex gap-2">
               <button onClick={() => window.location.assign(`/prompt/${p.slug}`)} className="px-3 py-1 bg-white/6 rounded">Open</button>
-              <button onClick={() => remove(p.id)} className="px-3 py-1 bg-red-600 rounded">Delete</button>
+              {p.status !== 'approved' && (
+                <button onClick={() => remove(p.id)} className="px-3 py-1 bg-red-600 rounded">Delete</button>
+              )}
             </div>
             {p.status === 'pending' && <div className="absolute left-3 bottom-3 text-sm text-yellow-300">Pending review</div>}
           </div>
