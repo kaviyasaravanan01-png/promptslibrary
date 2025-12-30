@@ -6,27 +6,35 @@ import { supabaseAdmin } from '../../../lib/supabaseServer';
 
 export async function GET(req: Request) {
   try {
-    console.log('[API/search] Received request');
     const url = new URL(req.url);
     const q = url.searchParams.get('q') || '';
     const page = parseInt(url.searchParams.get('page') || '1', 10) || 1;
     const limit = parseInt(url.searchParams.get('limit') || '24', 10) || 24;
     const offset = (page - 1) * limit;
+    const contentType = url.searchParams.get('contentType');
+    const categoryId = url.searchParams.get('categoryId');
+    const subcategoryId = url.searchParams.get('subId');
+    const subsubId = url.searchParams.get('subsubId');
 
-    console.log('[API/search] Incoming search', { q, page, limit, offset });
-    const { data, error } = await supabaseAdmin.rpc('search_prompts', { p_query: q, p_limit: limit, p_offset: offset });
+    let query = supabaseAdmin
+      .from('prompts')
+      .select('*')
+      .eq('status', 'approved')
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (q) query = query.ilike('title', `%${q}%`);
+    if (contentType && contentType !== 'all') query = query.eq('content_type', contentType);
+    if (categoryId) query = query.eq('category_id', categoryId);
+    if (subcategoryId) query = query.eq('subcategory_id', subcategoryId);
+    if (subsubId) query = query.eq('subsub_id', subsubId);
+
+    const { data, error } = await query;
     if (error) {
-      console.error('[API/search] search_prompts RPC error', error, { q, limit, offset });
-      return NextResponse.json({ error: error.message || 'search error', debug: { q, limit, offset } }, { status: 500 });
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
-    if (!data) {
-      console.error('[API/search] search_prompts: no data returned', { q, limit, offset });
-      return NextResponse.json({ ok: false, results: [], debug: { q, limit, offset } });
-    }
-    console.log('[API/search] search_prompts results', { q, count: data.length, data });
     return NextResponse.json({ ok: true, results: data });
   } catch (err: any) {
-    console.error('[API/search] search error', err);
     return NextResponse.json({ error: err?.message || 'server error' }, { status: 500 });
   }
 }

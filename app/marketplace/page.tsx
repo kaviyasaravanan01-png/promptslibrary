@@ -1,36 +1,46 @@
+"use client";
 import { supabase } from '../../lib/supabaseClient';
 import SearchBar from '../../components/SearchBar';
 import MarketplaceFilters from '../../components/MarketplaceFilters';
 import PromptGridWithFilter from '../../components/PromptGridWithFilter';
+import { useEffect, useState } from 'react';
 
 interface Props { searchParams?: { q?: string } }
 
-export default async function MarketplacePage({ searchParams }: Props) {
+
+
+export default function MarketplacePage({ searchParams }: Props) {
   const q = (searchParams?.q || '').trim();
   const limit = 24;
   const page = 1;
-  let results: any[] = [];
-  // Dynamically determine base URL for API calls
-  // let baseUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
-  let baseUrl:any='https://promptslibrary-nine.vercel.app';
-  // if (typeof window !== 'undefined') {
-  //   if (window.location.hostname === 'localhost') {
-  //     baseUrl = 'http://localhost:3000';
-  //   } else {
-  //     baseUrl = 'https://promptslibrary-nine.vercel.app';
-  //   }
-  // }
-  console.log('[MarketplacePage] baseUrl:', baseUrl);
-  const apiUrl = `${baseUrl}/api/search?q=${encodeURIComponent(q)}&limit=${limit}&page=${page}`;
-  try {
-    console.log('[MarketplacePage] fetching', apiUrl);
-    const res = await fetch(apiUrl, { cache: 'no-store' });
-    const json = await res.json();
-    console.log('[MarketplacePage] fetched results', json);
-    results = json.results || [];
-  } catch {
-    results = [];
-  }
+  const [results, setResults] = useState<any[]>([]);
+  const [filters, setFilters] = useState<any>({});
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchResults = async () => {
+      setLoading(true);
+      let baseUrl:any='http://localhost:3000';
+      const params = new URLSearchParams();
+      params.set('q', q);
+      params.set('limit', String(limit));
+      params.set('page', String(page));
+      if (filters.contentType && filters.contentType !== 'all') params.set('contentType', filters.contentType);
+      if (filters.categoryId) params.set('categoryId', filters.categoryId);
+      if (filters.subcategoryId) params.set('subId', filters.subcategoryId);
+      if (filters.subsubId) params.set('subsubId', filters.subsubId);
+      const apiUrl = `${baseUrl}/api/search?${params.toString()}`;
+      try {
+        const res = await fetch(apiUrl, { cache: 'no-store' });
+        const json = await res.json();
+        setResults(json.results || []);
+      } catch {
+        setResults([]);
+      }
+      setLoading(false);
+    };
+    fetchResults();
+  }, [q, limit, page, filters]);
 
   return (
     <div className="min-h-screen">
@@ -44,11 +54,11 @@ export default async function MarketplacePage({ searchParams }: Props) {
 
       <main className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-1">
-          <MarketplaceFilters />
+          <MarketplaceFilters onChange={setFilters} />
         </div>
         <div className="lg:col-span-3">
           <div className="mb-4 flex items-center justify-between">
-            <div className="text-sm text-gray-400">{results.length} results</div>
+            <div className="text-sm text-gray-400">{loading ? 'Loading...' : `${results.length} results`}</div>
             <div className="flex gap-2">
               <select className="p-2 bg-black/20 rounded">
                 <option>Sort: Relevance</option>

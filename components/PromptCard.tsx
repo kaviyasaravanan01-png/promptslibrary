@@ -44,8 +44,18 @@ export default function PromptCard({ prompt }: { prompt: any }) {
       </div>
       <h3 className="text-lg font-medium flex items-center gap-2">
         {prompt.title}
+        {prompt.content_type && (
+          <span className={`ml-2 px-2 py-0.5 rounded text-xs font-semibold ${prompt.content_type === 'video_tutorial' ? 'bg-blue-700 text-white' : 'bg-purple-700 text-white'}`}>{prompt.content_type === 'video_tutorial' ? 'Video Tutorial' : 'Prompt'}</span>
+        )}
       </h3>
       <p className="text-sm text-gray-300 mt-1">{prompt.description}</p>
+      {prompt.content_type === 'video_tutorial' && Array.isArray(prompt.video_tutorial_categories) && prompt.video_tutorial_categories.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-2">
+          {prompt.video_tutorial_categories.map((cat: string) => (
+            <span key={cat} className="bg-blue-900 text-xs text-white px-2 py-0.5 rounded">{cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+          ))}
+        </div>
+      )}
       <div className="mt-2 flex items-center gap-2">
         {reviewStats && (
           <>

@@ -62,6 +62,13 @@ export default function MyPromptsPage() {
         {items.map((p: any) => (
           <div key={p.id} className="relative">
             <PromptCard prompt={p} />
+            {p.content_type === 'video_tutorial' && Array.isArray(p.video_tutorial_categories) && p.video_tutorial_categories.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {p.video_tutorial_categories.map((cat: string) => (
+                  <span key={cat} className="bg-blue-900 text-xs text-white px-2 py-0.5 rounded">{cat.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+                ))}
+              </div>
+            )}
             <div className="mt-2 flex gap-2">
               <button onClick={() => window.location.assign(`/prompt/${p.slug}`)} className="px-3 py-1 bg-white/6 rounded">Open</button>
               {p.status !== 'approved' && (
