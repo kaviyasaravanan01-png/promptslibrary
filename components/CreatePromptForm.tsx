@@ -24,9 +24,10 @@ export default function CreatePromptForm({ initial, onSaved }: { initial?: any, 
   const [tutorialVideo, setTutorialVideo] = useState<File | null>(null);
   const [images, setImages] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [tagsText, setTagsText] = useState((initial?.tags || []).join(', ') || '');
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/categories').then(r => r.json()).then(d => setCategoriesTree(d.categories || []));
+    fetch('/api/categories').then(r => r.json()).then(d => setCategoriesTree(d.categories || []));
   }, []);
 
   // keep SEO title prefilled with prompt title unless user edits it
@@ -157,8 +158,9 @@ export default function CreatePromptForm({ initial, onSaved }: { initial?: any, 
 
     const requirements = (requirementsText || '').split('\n').map(s => s.trim()).filter(Boolean);
     const instructions = (instructionsText || '').split('\n').map(s => s.trim()).filter(Boolean);
+    const tags = tagsText.split(',').map(t => t.trim()).filter(Boolean);
 
-    const payload = { title, slug, description, prompt_text: promptText, result_urls, categories: catsPayload, requirements, instructions, seo_title: seoTitle, seo_description: seoDescription, content_type: contentType, video_tutorial_categories: contentType === 'video_tutorial' ? videoTutorialCategories : null };
+    const payload = { title, slug, description, prompt_text: promptText, result_urls, categories: catsPayload, requirements, instructions, seo_title: seoTitle, seo_description: seoDescription, content_type: contentType, video_tutorial_categories: contentType === 'video_tutorial' ? videoTutorialCategories : null, tags };
     const res = await fetch('/api/prompts/create', { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` }, body: JSON.stringify(payload) });
     let json: any = {};
     try {
@@ -241,6 +243,16 @@ export default function CreatePromptForm({ initial, onSaved }: { initial?: any, 
           <button type="button" onClick={addSelection} className="px-3 py-1 bg-white/6 rounded">Add Category</button>
         </div>
       </div> */}
+      <div>
+        <label className="block text-sm">Tags / Keywords (comma separated)</label>
+        <input
+          value={tagsText}
+          onChange={e => setTagsText(e.target.value)}
+          className="w-full p-2 bg-black/20 rounded"
+          placeholder="e.g. stable diffusion, anime, portrait, chatgpt"
+        />
+        <p className="text-xs text-gray-400 mt-1">Add relevant keywords to make your prompt/tutorial easier to discover</p>
+      </div>
       <div>
         <label className="block text-sm">Slug (unique)</label>
         <input value={slug} onChange={e => setSlug(e.target.value)} className="w-full p-2 bg-black/20 rounded" />

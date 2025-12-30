@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabaseClient';
 import PromptGridWithFilter from '../components/PromptGridWithFilter';
 import SearchBar from '../components/SearchBar';
 import MarketplaceFilters from '../components/MarketplaceFilters';
+import PopularTags from '../components/PopularTags';
 import Link from 'next/link';
 
 export default function Home() {
@@ -16,7 +17,7 @@ export default function Home() {
       setLoading(true);
       let query = supabase
         .from('prompts')
-        .select('id,slug,title,description,model,result_urls,is_premium,price,requirements,instructions,trusted,content_type,category_id,subcategory_id,subsub_id')
+        .select('id,slug,title,description,model,result_urls,is_premium,price,requirements,instructions,trusted,content_type,category_id,subcategory_id,subsub_id,tags')
         .eq('status', 'approved')
         .order('created_at', { ascending: false })
         .limit(24);
@@ -45,6 +46,7 @@ export default function Home() {
         </div>
         <div className="mt-6">
           <SearchBar />
+          <PopularTags />
         </div>
       </header>
       <main className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6">

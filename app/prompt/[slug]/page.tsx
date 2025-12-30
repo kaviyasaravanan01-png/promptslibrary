@@ -31,7 +31,7 @@ export default async function PromptPage({ params }: Props) {
 
   const { data, error } = await supabase
     .from('prompts')
-    .select('id,slug,title,description,model,result_urls,is_premium,price,created_by,status,requirements,instructions,seo_title,seo_description,trusted')
+    .select('id,slug,title,description,model,result_urls,is_premium,price,created_by,status,requirements,instructions,seo_title,seo_description,trusted,tags')
     .eq('slug', slug)
     .single();
 
@@ -107,6 +107,16 @@ console.log('data', data);
               <h3 className="text-sm font-semibold">Categories</h3>
               <CategoryList promptId={data.id} />
             </div>
+            {Array.isArray(data.tags) && data.tags.length > 0 && (
+              <div className="mt-4">
+                <h3 className="text-sm font-semibold">Tags</h3>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {data.tags.map((tag: string, idx: number) => (
+                    <span key={idx} className="bg-gray-700 text-sm text-gray-200 px-3 py-1 rounded-full">{tag}</span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>

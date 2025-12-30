@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     console.log('[prompts/create] invoked by', userData.user.id, userData.user.email);
 
     const body = await req.json();
-    const { title, description, model, prompt_text, result_urls, slug, categories, requirements, instructions, seo_title, seo_description, content_type, video_tutorial_categories } = body;
+    const { title, description, model, prompt_text, result_urls, slug, categories, requirements, instructions, seo_title, seo_description, content_type, video_tutorial_categories, tags } = body;
     if (!title || !slug) return NextResponse.json({ error: 'title and slug required' }, { status: 400 });
 
     // validate result_urls: array of { type: 'image'|'video'|'audio'|'scenario', url }
@@ -54,7 +54,8 @@ export async function POST(req: Request) {
       created_by: userData.user.id,
       status,
       content_type: content_type || 'prompt',
-      video_tutorial_categories: content_type === 'video_tutorial' ? (Array.isArray(video_tutorial_categories) ? video_tutorial_categories : null) : null
+      video_tutorial_categories: content_type === 'video_tutorial' ? (Array.isArray(video_tutorial_categories) ? video_tutorial_categories : null) : null,
+      tags: Array.isArray(tags) ? tags : []
     };
 
     const { data, error: insertErr } = await supabaseAdmin.from('prompts').insert(prompt).select('*').single();

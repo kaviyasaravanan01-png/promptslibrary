@@ -8,6 +8,7 @@ export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
     const q = url.searchParams.get('q') || '';
+    const tag = url.searchParams.get('tag') || '';
     const page = parseInt(url.searchParams.get('page') || '1', 10) || 1;
     const limit = parseInt(url.searchParams.get('limit') || '24', 10) || 24;
     const offset = (page - 1) * limit;
@@ -23,7 +24,12 @@ export async function GET(req: Request) {
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
-    if (q) query = query.ilike('title', `%${q}%`);
+    if (q) {
+      query = query.or(`title.ilike.%${q}%,description.ilike.%${q}%,tags.cs.{${q}}`);
+    }
+    if (tag) {
+      query = query.contains('tags', [tag]);
+    }
     if (contentType && contentType !== 'all') query = query.eq('content_type', contentType);
     if (categoryId) query = query.eq('category_id', categoryId);
     if (subcategoryId) query = query.eq('subcategory_id', subcategoryId);

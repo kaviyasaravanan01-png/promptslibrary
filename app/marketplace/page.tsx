@@ -3,14 +3,16 @@ import { supabase } from '../../lib/supabaseClient';
 import SearchBar from '../../components/SearchBar';
 import MarketplaceFilters from '../../components/MarketplaceFilters';
 import PromptGridWithFilter from '../../components/PromptGridWithFilter';
+import PopularTags from '../../components/PopularTags';
 import { useEffect, useState } from 'react';
 
-interface Props { searchParams?: { q?: string } }
+interface Props { searchParams?: { q?: string; tag?: string } }
 
 
 
 export default function MarketplacePage({ searchParams }: Props) {
   const q = (searchParams?.q || '').trim();
+  const tag = (searchParams?.tag || '').trim();
   const limit = 24;
   const page = 1;
   const [results, setResults] = useState<any[]>([]);
@@ -23,6 +25,7 @@ export default function MarketplacePage({ searchParams }: Props) {
       let baseUrl:any='http://localhost:3000';
       const params = new URLSearchParams();
       params.set('q', q);
+      if (tag) params.set('tag', tag);
       params.set('limit', String(limit));
       params.set('page', String(page));
       if (filters.contentType && filters.contentType !== 'all') params.set('contentType', filters.contentType);
@@ -40,7 +43,7 @@ export default function MarketplacePage({ searchParams }: Props) {
       setLoading(false);
     };
     fetchResults();
-  }, [q, limit, page, filters]);
+  }, [q, tag, limit, page, filters]);
 
   return (
     <div className="min-h-screen">
@@ -49,6 +52,7 @@ export default function MarketplacePage({ searchParams }: Props) {
           <h1 className="text-3xl font-bold mb-2">Marketplace</h1>
           <p className="text-gray-400 mb-4">Advanced search and filters. Try keywords or paste a prompt for semantic matching.</p>
           <SearchBar initial={q} />
+          <PopularTags />
         </div>
       </header>
 

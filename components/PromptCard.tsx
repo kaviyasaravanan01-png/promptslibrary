@@ -56,6 +56,13 @@ export default function PromptCard({ prompt }: { prompt: any }) {
           ))}
         </div>
       )}
+      {Array.isArray(prompt.tags) && prompt.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-2">
+          {prompt.tags.map((tag: string, idx: number) => (
+            <span key={idx} className="bg-gray-700 text-xs text-gray-200 px-2 py-0.5 rounded">{tag}</span>
+          ))}
+        </div>
+      )}
       <div className="mt-2 flex items-center gap-2">
         {reviewStats && (
           <>
