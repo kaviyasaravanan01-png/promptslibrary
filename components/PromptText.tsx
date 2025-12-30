@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabaseClient';
 import BuyPromptButton from './BuyPromptButton';
 import CopyAndOpenButtons from './CopyAndOpenButtons';
 
-export default function PromptText({ slug, promptId, isPremium, price }: { slug: string; promptId: string; isPremium: boolean; price: number }) {
+export default function PromptText({ slug, promptId, isPremium, price, model }: { slug: string; promptId: string; isPremium: boolean; price: number; model?: string }) {
   const [loading, setLoading] = useState(true);
   const [text, setText] = useState<string | null>(null);
   const [locked, setLocked] = useState(isPremium);
@@ -59,7 +59,7 @@ export default function PromptText({ slug, promptId, isPremium, price }: { slug:
     <div className="mt-4 p-4 bg-white/6 rounded-lg">
       <pre className="whitespace-pre-wrap text-sm text-gray-100">{text}</pre>
       <div className="mt-3">
-        <CopyAndOpenButtons slug={slug} model={''} text={text} />
+        <CopyAndOpenButtons slug={slug} model={model} text={text} />
       </div>
     </div>
   );

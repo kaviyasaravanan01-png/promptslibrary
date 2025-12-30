@@ -6,7 +6,7 @@ const appUrlMap: Record<string, { label: string; url: string }> = {
   'gpt-4': { label: 'Open in ChatGPT', url: 'https://chat.openai.com/' },
   'gpt-4o': { label: 'Open in ChatGPT', url: 'https://chat.openai.com/' },
   'chatgpt': { label: 'Open in ChatGPT', url: 'https://chat.openai.com/' },
-  'gemini': { label: 'Open in Gemini', url: 'https://chat.google.com/' },
+  'gemini': { label: 'Open in Gemini', url: 'https://gemini.google.com/app' },
   'midjourney': { label: 'Open in MidJourney', url: 'https://www.midjourney.com/app/' }
 };
 
@@ -33,13 +33,26 @@ export default function CopyAndOpenButtons({ slug, model, text }: { slug: string
     const t = await fetchPromptText();
     if (!t) return alert('Prompt locked or not available');
     await navigator.clipboard.writeText(t);
-    const key = model?.toLowerCase() || 'chatgpt';
-    const target = Object.keys(appUrlMap).find(k => key.includes(k)) || 'chatgpt';
+    const modelLower = model?.toLowerCase() || '';
+    
+    // Find best match: check both directions (model contains key OR key contains model)
+    let target = 'chatgpt'; // default fallback
+    for (const key of Object.keys(appUrlMap)) {
+      if (modelLower.includes(key) || key.includes(modelLower)) {
+        target = key;
+        break;
+      }
+    }
+    
     const url = appUrlMap[target].url;
     try {
       // Try prefill via query param (best-effort). Many apps ignore this, but clipboard contains the prompt as fallback.
       const prefillUrl = `${url}?prompt=${encodeURIComponent(t)}`;
       window.open(prefillUrl, '_blank');
+      // Show helpful message for apps that don't support URL prefill
+      if (target === 'gemini') {
+        alert('Prompt copied to clipboard! Paste it (Ctrl+V) into the Gemini app.');
+      }
     } catch (e) {
       window.open(url, '_blank');
     }

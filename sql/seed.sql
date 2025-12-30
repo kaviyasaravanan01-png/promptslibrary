@@ -50,6 +50,20 @@ VALUES (
   '11111111-1111-1111-1111-111111111111'
 );
 
+-- Free Gemini prompt
+INSERT INTO prompts (slug, title, description, model, result_urls, is_premium, price, prompt_text, created_by)
+VALUES (
+  'gemini-research-assistant',
+  'AI Research Assistant — Gemini',
+  'Free research assistant prompt for deep topic analysis',
+  'gemini',
+  '[]'::jsonb,
+  false,
+  0,
+  'You are an expert research assistant. Analyze the topic: "The impact of AI on modern education." Provide a comprehensive overview covering: 1) Current applications, 2) Benefits and challenges, 3) Future trends, 4) Recommendations for educators. Use credible sources and data where possible.',
+  '11111111-1111-1111-1111-111111111111'
+);
+
 -- link sample prompts to categories (example: associate sample-prompt with models->midjourney prompts->3D)
 with p as (select id from prompts where slug='sample-prompt'),
      c as (select id from categories where slug='models'),
@@ -71,4 +85,11 @@ with p3 as (select id from prompts where slug='chatgpt-creative-idea'),
      s3 as (select id from subcategories where category_id = (select id from categories where slug='models') and slug = 'chatgpt-prompts')
 insert into prompt_categories (prompt_id, category_id, subcategory_id)
 select p3.id, c3.id, s3.id from p3, c3, s3
+on conflict do nothing;
+
+with p4 as (select id from prompts where slug='gemini-research-assistant'),
+     c4 as (select id from categories where slug='models'),
+     s4 as (select id from subcategories where category_id = (select id from categories where slug='models') and slug = 'gemini-prompts')
+insert into prompt_categories (prompt_id, category_id, subcategory_id)
+select p4.id, c4.id, s4.id from p4, c4, s4
 on conflict do nothing;

@@ -86,7 +86,7 @@ console.log('data', data);
             <MediaGallery items={(data.result_urls || []) as any} />
           </div>
           <div>
-            <PromptText slug={data.slug} promptId={data.id} isPremium={data.is_premium} price={data.price} />
+            <PromptText slug={data.slug} promptId={data.id} isPremium={data.is_premium} price={data.price} model={data.model} />
             {Array.isArray(data.requirements) && data.requirements.length > 0 && (
               <div className="mt-4">
                 <h3 className="text-sm font-semibold">Requirements</h3>
