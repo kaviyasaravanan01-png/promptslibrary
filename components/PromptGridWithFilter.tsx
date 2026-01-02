@@ -60,7 +60,7 @@ export default function PromptGridWithFilter({ prompts, initialContentType }: { 
           <Link href="/favorites" className="ml-4 text-sm text-gray-300">Open Favorites Page</Link>
         </div>
         <div>
-          {user?.email === 'anandanathurelangovan94@gmail.com' && (
+          {user?.email === 'kaviyasaravanan01@gmail.com' && (
             <Link href="/admin/review" className="ml-4 text-sm text-red-400 px-2 py-1 border rounded">Admin Review</Link>
           )}
         </div>

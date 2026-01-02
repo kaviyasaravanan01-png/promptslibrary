@@ -6,17 +6,19 @@ import PromptGridWithFilter from '../../components/PromptGridWithFilter';
 import PopularTags from '../../components/PopularTags';
 import { useEffect, useState } from 'react';
 
-interface Props { searchParams?: { q?: string; tag?: string } }
+interface Props { searchParams?: { q?: string; tag?: string; contentType?: string; is_featured?: string } }
 
 
 
 export default function MarketplacePage({ searchParams }: Props) {
   const q = (searchParams?.q || '').trim();
   const tag = (searchParams?.tag || '').trim();
+  const contentType = (searchParams?.contentType || 'prompt').trim();
+  const isFeatured = searchParams?.is_featured === 'true';
   const limit = 24;
   const page = 1;
   const [results, setResults] = useState<any[]>([]);
-  const [filters, setFilters] = useState<any>({});
+  const [filters, setFilters] = useState<any>({ contentType, isFeatured });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -32,6 +34,8 @@ export default function MarketplacePage({ searchParams }: Props) {
       if (filters.categoryId) params.set('categoryId', filters.categoryId);
       if (filters.subcategoryId) params.set('subId', filters.subcategoryId);
       if (filters.subsubId) params.set('subsubId', filters.subsubId);
+      if (filters.resultOutputType) params.set('resultOutputType', filters.resultOutputType);
+      if (filters.isFeatured) params.set('isFeatured', 'true');
       const apiUrl = `${baseUrl}/api/search?${params.toString()}`;
       try {
         const res = await fetch(apiUrl, { cache: 'no-store' });
@@ -58,7 +62,7 @@ export default function MarketplacePage({ searchParams }: Props) {
 
       <main className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-1">
-          <MarketplaceFilters onChange={setFilters} />
+          <MarketplaceFilters onChange={setFilters} initialContentType={contentType} />
         </div>
         <div className="lg:col-span-3">
           <div className="mb-4 flex items-center justify-between">

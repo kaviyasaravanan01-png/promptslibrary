@@ -8,6 +8,7 @@ type CatSelection = { category_id?: string; subcategory_id?: string; subsub_id?:
 export default function CreatePromptForm({ initial, onSaved }: { initial?: any, onSaved?: (p: any) => void }) {
   const [title, setTitle] = useState(initial?.title || '');
   const [contentType, setContentType] = useState(initial?.content_type || 'prompt');
+  const [resultOutputType, setResultOutputType] = useState(initial?.result_output_type || (initial?.content_type === 'video_tutorial' ? 'video' : 'image'));
   const [videoTutorialCategories, setVideoTutorialCategories] = useState<any[]>(initial?.video_tutorial_categories || []);
   const [slug, setSlug] = useState(initial?.slug || '');
   const [description, setDescription] = useState(initial?.description || '');
@@ -160,7 +161,7 @@ export default function CreatePromptForm({ initial, onSaved }: { initial?: any, 
     const instructions = (instructionsText || '').split('\n').map(s => s.trim()).filter(Boolean);
     const tags = tagsText.split(',').map(t => t.trim()).filter(Boolean);
 
-    const payload = { title, slug, description, prompt_text: promptText, result_urls, categories: catsPayload, requirements, instructions, seo_title: seoTitle, seo_description: seoDescription, content_type: contentType, video_tutorial_categories: contentType === 'video_tutorial' ? videoTutorialCategories : null, tags };
+    const payload = { title, slug, description, prompt_text: promptText, result_urls, categories: catsPayload, requirements, instructions, seo_title: seoTitle, seo_description: seoDescription, content_type: contentType, result_output_type: resultOutputType, video_tutorial_categories: contentType === 'video_tutorial' ? videoTutorialCategories : null, tags };
     const res = await fetch('/api/prompts/create', { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` }, body: JSON.stringify(payload) });
     let json: any = {};
     try {
@@ -180,11 +181,32 @@ export default function CreatePromptForm({ initial, onSaved }: { initial?: any, 
     <form onSubmit={submit} className="space-y-3 bg-white/3 p-4 rounded">
       <div>
         <label className="block text-sm">Content Type</label>
-        <select value={contentType} onChange={e => setContentType(e.target.value)} className="w-full p-2 bg-black/20 rounded">
+        <select value={contentType} onChange={e => { setContentType(e.target.value); if (e.target.value === 'video_tutorial') setResultOutputType('video'); }} className="w-full p-2 bg-black/20 rounded">
           <option value="prompt">Prompt</option>
           <option value="video_tutorial">Video Tutorial</option>
         </select>
       </div>
+
+      {/* Result Output Type Selector */}
+      <div>
+        <label className="block text-sm">Expected Output Type</label>
+        {contentType === 'video_tutorial' ? (
+          <div className="p-2 bg-black/20 rounded text-sm text-gray-300">
+            Video (Default for video tutorials)
+          </div>
+        ) : (
+          <select value={resultOutputType} onChange={e => setResultOutputType(e.target.value)} className="w-full p-2 bg-black/20 rounded">
+            <option value="image">Image</option>
+            <option value="text">Text</option>
+            <option value="video">Video</option>
+            <option value="code">Code</option>
+            <option value="design">Design / File</option>
+            <option value="other">Other</option>
+          </select>
+        )}
+        <p className="text-xs text-gray-400 mt-1">Select what users will receive as output from using this prompt</p>
+      </div>
+
       {/* Category selection: show only prompt categories for prompt, only video tutorial categories for video_tutorial */}
       <div>
         <label className="block text-sm">Categories (select up to 3)</label>

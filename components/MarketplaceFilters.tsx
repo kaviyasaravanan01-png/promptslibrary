@@ -2,20 +2,29 @@
 
 import { useEffect, useState } from 'react';
 
-export default function MarketplaceFilters({ onChange }: { onChange?: (filters: any) => void }) {
-  const [contentType, setContentType] = useState<string>('all');
+export default function MarketplaceFilters({ onChange, initialContentType }: { onChange?: (filters: any) => void; initialContentType?: string }) {
+  const [contentType, setContentType] = useState<string>(initialContentType || 'all');
   const [categoriesTree, setCategoriesTree] = useState<any[]>([]);
   const [categoryId, setCategoryId] = useState<string>('');
   const [subcategoryId, setSubcategoryId] = useState<string>('');
   const [subsubId, setSubsubId] = useState<string>('');
+  const [resultOutputType, setResultOutputType] = useState<string>('');
+  const [isFeatured, setIsFeatured] = useState<boolean>(false);
 
   useEffect(() => {
     fetch('/api/categories').then(r => r.json()).then(d => setCategoriesTree(d.categories || []));
   }, []);
 
+  // Update contentType when initialContentType prop changes
   useEffect(() => {
-    onChange?.({ contentType, categoryId, subcategoryId, subsubId });
-  }, [contentType, categoryId, subcategoryId, subsubId, onChange]);
+    if (initialContentType && initialContentType !== 'all') {
+      setContentType(initialContentType);
+    }
+  }, [initialContentType]);
+
+  useEffect(() => {
+    onChange?.({ contentType, categoryId, subcategoryId, subsubId, resultOutputType, isFeatured });
+  }, [contentType, categoryId, subcategoryId, subsubId, resultOutputType, isFeatured, onChange]);
 
   // Filter categories by content type
   const filteredCategories = contentType === 'all' ? categoriesTree : categoriesTree.filter((c: any) => c.type === contentType);
@@ -27,6 +36,8 @@ export default function MarketplaceFilters({ onChange }: { onChange?: (filters: 
     setSubcategoryId('');
     setSubsubId('');
     setContentType('all');
+    setResultOutputType('');
+    setIsFeatured(false);
   };
 
   return (
@@ -62,6 +73,29 @@ export default function MarketplaceFilters({ onChange }: { onChange?: (filters: 
             </select>
           </>
         )}
+      </div>
+      <div className="mt-4">
+        <div className="text-sm text-gray-300 mb-1">Expected Output Type</div>
+        <select value={resultOutputType} onChange={e => setResultOutputType(e.target.value)} className="p-2 bg-black/20 rounded mb-2 w-full">
+          <option value="">All Types</option>
+          <option value="image">Image</option>
+          <option value="text">Text</option>
+          <option value="video">Video</option>
+          <option value="code">Code</option>
+          <option value="design">Design</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div className="mt-4">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={isFeatured}
+            onChange={(e) => setIsFeatured(e.target.checked)}
+            className="accent-pink-500"
+          />
+          <span className="text-sm text-gray-300">Featured Only</span>
+        </label>
       </div>
       <div className="mt-4">
         <button onClick={clearAll} className="px-3 py-1 bg-white/6 rounded" type="button">Clear</button>

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '../../../../lib/supabaseServer';
 
-const ADMIN_EMAIL = 'anandanathurelangovan94@gmail.com';
+const ADMIN_EMAIL = 'kaviyasaravanan01@gmail.com';
 
 export async function POST(req: Request) {
   try {
@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     console.log('[prompts/create] invoked by', userData.user.id, userData.user.email);
 
     const body = await req.json();
-    const { title, description, model, prompt_text, result_urls, slug, categories, requirements, instructions, seo_title, seo_description, content_type, video_tutorial_categories, tags } = body;
+    const { title, description, model, prompt_text, result_urls, slug, categories, requirements, instructions, seo_title, seo_description, content_type, result_output_type, video_tutorial_categories, tags } = body;
     if (!title || !slug) return NextResponse.json({ error: 'title and slug required' }, { status: 400 });
 
     // validate result_urls: array of { type: 'image'|'video'|'audio'|'scenario', url }
@@ -54,6 +54,7 @@ export async function POST(req: Request) {
       created_by: userData.user.id,
       status,
       content_type: content_type || 'prompt',
+      result_output_type: content_type === 'video_tutorial' ? 'video' : (result_output_type || 'image'),
       video_tutorial_categories: content_type === 'video_tutorial' ? (Array.isArray(video_tutorial_categories) ? video_tutorial_categories : null) : null,
       tags: Array.isArray(tags) ? tags : []
     };

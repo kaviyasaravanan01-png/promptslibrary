@@ -16,6 +16,8 @@ export async function GET(req: Request) {
     const categoryId = url.searchParams.get('categoryId');
     const subcategoryId = url.searchParams.get('subId');
     const subsubId = url.searchParams.get('subsubId');
+    const resultOutputType = url.searchParams.get('resultOutputType');
+    const isFeatured = url.searchParams.get('isFeatured') === 'true';
 
     let query = supabaseAdmin
       .from('prompts')
@@ -34,6 +36,8 @@ export async function GET(req: Request) {
     if (categoryId) query = query.eq('category_id', categoryId);
     if (subcategoryId) query = query.eq('subcategory_id', subcategoryId);
     if (subsubId) query = query.eq('subsub_id', subsubId);
+    if (resultOutputType) query = query.eq('result_output_type', resultOutputType);
+    if (isFeatured) query = query.eq('is_featured', true);
 
     const { data, error } = await query;
     if (error) {

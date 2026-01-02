@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '../../../../lib/supabaseServer';
 
-const ADMIN_EMAIL = 'anandanathurelangovan94@gmail.com';
+const ADMIN_EMAIL = 'kaviyasaravanan01@gmail.com';
 
 export async function GET(req: Request) {
   try {
