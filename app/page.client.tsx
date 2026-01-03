@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import HeroSection from '../components/hero/HeroSection';
 import FeatureCarousel from '../components/feature-carousel/FeatureCarousel';
 import FeaturedSection from '../components/featured/FeaturedSection';
+import TrendingSection from '../components/trending/TrendingSection';
+import OutputTypeSection from '../components/output-type/OutputTypeSection';
+import ExploreMarketplaceCTA from '../components/cta/ExploreMarketplaceCTA';
 import PromptGridWithFilter from '../components/PromptGridWithFilter';
 import MarketplaceFilters from '../components/MarketplaceFilters';
 import PopularTags from '../components/PopularTags';
@@ -13,6 +16,9 @@ export default function Home() {
   const [prompts, setPrompts] = useState<any[]>([]);
   const [featuredPrompts, setFeaturedPrompts] = useState<any[]>([]);
   const [featuredVideoTutorials, setFeaturedVideoTutorials] = useState<any[]>([]);
+  const [trendingPrompts, setTrendingPrompts] = useState<any[]>([]);
+  const [trendingVideos, setTrendingVideos] = useState<any[]>([]);
+  const [outputTypeData, setOutputTypeData] = useState<Record<string, any[]>>({});
   const [filters, setFilters] = useState<any>({});
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -71,6 +77,57 @@ export default function Home() {
     fetchFeaturedVideoTutorials();
   }, []);
 
+  // Fetch trending content
+  useEffect(() => {
+    const fetchTrending = async () => {
+      try {
+        const [promptRes, videoRes] = await Promise.all([
+          fetch('/api/trending?contentType=prompt&limit=15', { cache: 'no-store' }),
+          fetch('/api/trending?contentType=video_tutorial&limit=15', { cache: 'no-store' })
+        ]);
+        const promptJson = await promptRes.json();
+        const videoJson = await videoRes.json();
+        setTrendingPrompts(promptJson.items || []);
+        setTrendingVideos(videoJson.items || []);
+      } catch (err) {
+        console.error('trending fetch error', err);
+      }
+    };
+    fetchTrending();
+  }, []);
+
+  // Fetch output-type sections (image, video, code)
+  useEffect(() => {
+    const sections = [
+      { key: 'image', expectedOutputType: 'image' },
+      { key: 'video', expectedOutputType: 'video' },
+      { key: 'code', expectedOutputType: 'code' },
+    ];
+
+    const fetchAll = async () => {
+      try {
+        const results = await Promise.all(sections.map(async (section) => {
+          const { data } = await supabase
+            .from('prompts')
+            .select('id,slug,title,description,model,result_urls,is_premium,price,content_type,tags')
+            .eq('status', 'approved')
+            .eq('result_output_type', section.expectedOutputType)
+            .order('created_at', { ascending: false })
+            .limit(8);
+          return { key: section.key, data: data || [] };
+        }));
+
+        const mapped: Record<string, any[]> = {};
+        results.forEach((r) => { mapped[r.key] = r.data; });
+        setOutputTypeData(mapped);
+      } catch (err) {
+        console.error('output type fetch error', err);
+      }
+    };
+
+    fetchAll();
+  }, []);
+
   const handleHeroSearch = (query: string) => {
     router.push(`/marketplace?q=${encodeURIComponent(query)}`);
   };
@@ -82,6 +139,17 @@ export default function Home() {
 
       {/* Feature Carousel */}
       <FeatureCarousel />
+
+      {/* Trending Sections */}
+      <TrendingSection
+        title="Trending Prompts"
+        items={trendingPrompts}
+      />
+
+      <TrendingSection
+        title="Trending Video Tutorials"
+        items={trendingVideos}
+      />
 
       {/* Featured Prompts */}
       <FeaturedSection
@@ -99,19 +167,44 @@ export default function Home() {
         viewAllLink="/marketplace?is_featured=true&contentType=video_tutorial"
       />
 
+      {/* Output Type Discovery */}
+      <OutputTypeSection
+        title="Photo Prompts"
+        items={outputTypeData.image || []}
+        viewAllLink="/marketplace?expectedOutput=image"
+        contentType="prompt"
+      />
+      <OutputTypeSection
+        title="Video Prompts"
+        items={outputTypeData.video || []}
+        viewAllLink="/marketplace?expectedOutput=video"
+        contentType="video_tutorial"
+      />
+      <OutputTypeSection
+        title="Code Prompts"
+        items={outputTypeData.code || []}
+        viewAllLink="/marketplace?expectedOutput=code"
+        contentType="prompt"
+      />
+
+      {/* CTA Banner */}
+      <div className="w-full px-4 sm:px-6 lg:px-8">
+        <ExploreMarketplaceCTA />
+      </div>
+
       {/* Popular Tags */}
       <div className="max-w-6xl mx-auto px-6 md:px-8 mb-12">
         <PopularTags />
       </div>
 
-      {/* Trending Prompts Section */}
-      <section className="max-w-6xl mx-auto px-6 md:px-8" aria-label="Trending prompts">
+      {/* Browse Prompts Section */}
+      <section className="max-w-6xl mx-auto px-6 md:px-8" aria-label="Browse prompts">
         <div className="mb-8">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">
-            Trending Prompts
+            Browse Prompts
           </h2>
           <p className="text-gray-400">
-            Most loved prompts from our community
+            Filter and explore the latest approved prompts
           </p>
         </div>
 

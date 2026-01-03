@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from 'react';
 
-export default function MarketplaceFilters({ onChange, initialContentType }: { onChange?: (filters: any) => void; initialContentType?: string }) {
+export default function MarketplaceFilters({ onChange, initialContentType, initialResultOutputType }: { onChange?: (filters: any) => void; initialContentType?: string; initialResultOutputType?: string }) {
   const [contentType, setContentType] = useState<string>(initialContentType || 'all');
   const [categoriesTree, setCategoriesTree] = useState<any[]>([]);
   const [categoryId, setCategoryId] = useState<string>('');
   const [subcategoryId, setSubcategoryId] = useState<string>('');
   const [subsubId, setSubsubId] = useState<string>('');
-  const [resultOutputType, setResultOutputType] = useState<string>('');
+  const [resultOutputType, setResultOutputType] = useState<string>(initialResultOutputType || '');
   const [isFeatured, setIsFeatured] = useState<boolean>(false);
 
   useEffect(() => {
@@ -21,6 +21,13 @@ export default function MarketplaceFilters({ onChange, initialContentType }: { o
       setContentType(initialContentType);
     }
   }, [initialContentType]);
+
+  // Update resultOutputType when initialResultOutputType changes
+  useEffect(() => {
+    if (initialResultOutputType) {
+      setResultOutputType(initialResultOutputType);
+    }
+  }, [initialResultOutputType]);
 
   useEffect(() => {
     onChange?.({ contentType, categoryId, subcategoryId, subsubId, resultOutputType, isFeatured });

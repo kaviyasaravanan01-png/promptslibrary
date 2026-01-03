@@ -2,6 +2,7 @@ import './globals.css';
 import { ReactNode } from 'react';
 import Link from 'next/link';
 import AuthButton from '../components/AuthButton';
+import Footer from '../components/footer/Footer';
 
 export const metadata = {
   title: 'Prompt Library',
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             </div>
           </header>
           <main className="container mx-auto p-6">{children}</main>
+          <Footer />
         </div>
       </body>
     </html>

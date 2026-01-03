@@ -6,7 +6,7 @@ import PromptGridWithFilter from '../../components/PromptGridWithFilter';
 import PopularTags from '../../components/PopularTags';
 import { useEffect, useState } from 'react';
 
-interface Props { searchParams?: { q?: string; tag?: string; contentType?: string; is_featured?: string } }
+interface Props { searchParams?: { q?: string; tag?: string; contentType?: string; is_featured?: string; expectedOutput?: string } }
 
 
 
@@ -15,10 +15,11 @@ export default function MarketplacePage({ searchParams }: Props) {
   const tag = (searchParams?.tag || '').trim();
   const contentType = (searchParams?.contentType || 'prompt').trim();
   const isFeatured = searchParams?.is_featured === 'true';
+  const expectedOutput = (searchParams?.expectedOutput || '').trim();
   const limit = 24;
   const page = 1;
   const [results, setResults] = useState<any[]>([]);
-  const [filters, setFilters] = useState<any>({ contentType, isFeatured });
+  const [filters, setFilters] = useState<any>({ contentType, isFeatured, resultOutputType: expectedOutput });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -62,7 +63,7 @@ export default function MarketplacePage({ searchParams }: Props) {
 
       <main className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-1">
-          <MarketplaceFilters onChange={setFilters} initialContentType={contentType} />
+          <MarketplaceFilters onChange={setFilters} initialContentType={contentType} initialResultOutputType={expectedOutput} />
         </div>
         <div className="lg:col-span-3">
           <div className="mb-4 flex items-center justify-between">
