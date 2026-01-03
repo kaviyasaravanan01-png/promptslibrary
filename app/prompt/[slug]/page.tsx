@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { supabase } from '../../../lib/supabaseClient';
 import BuyPromptButton from '../../../components/BuyPromptButton';
 import FavoriteButton from '../../../components/FavoriteButton';
+import ReportButton from '../../../components/ReportButton';
 import CommentList from '../../../components/CommentList';
 import PromptReviewSection from '../../../components/PromptReviewSection';
 import PromptText from '../../../components/PromptText';
@@ -91,7 +92,10 @@ export default async function PromptPage({ params }: Props) {
           <PromptReviewSection promptId={data.id} isPremium={data.is_premium} />
         </div>
         <div className="space-y-2 text-right">
-          <FavoriteButton promptId={data.id} />
+          <div className="flex gap-2 justify-end">
+            <FavoriteButton promptId={data.id} />
+            <ReportButton promptId={data.id} promptTitle={data.title} />
+          </div>
           {data.is_premium ? <BuyPromptButton promptId={data.id} amount={data.price} /> : <div className="px-4 py-2 bg-green-500 text-black rounded">Free</div>}
         </div>
       </header>
