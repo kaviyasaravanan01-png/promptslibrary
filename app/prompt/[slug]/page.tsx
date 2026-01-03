@@ -6,7 +6,6 @@ import FavoriteButton from '../../../components/FavoriteButton';
 import CommentList from '../../../components/CommentList';
 import PromptReviewSection from '../../../components/PromptReviewSection';
 import PromptText from '../../../components/PromptText';
-import CopyAndOpenButtons from '../../../components/CopyAndOpenButtons';
 import MediaGallery from '../../../components/MediaGallery';
 import MediaGalleryWithPrompts from '../../../components/MediaGalleryWithPrompts';
 import CategoryList from '../../../components/CategoryList';
@@ -66,9 +65,6 @@ export default async function PromptPage({ params }: Props) {
     console.log('Could not fetch from prompt_results table, using result_urls');
   }
   // For approved prompts, do NOT render delete button anywhere in the page.
-
-console.log('data', data);
-  
   // Check if results have the new structure with prompt descriptions
   const hasNewResultStructure = Array.isArray(results) && results.length > 0 && 'prompt_description' in results[0];
 
