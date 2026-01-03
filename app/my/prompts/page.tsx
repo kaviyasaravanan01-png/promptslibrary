@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
 import PromptCard from '../../../components/PromptCard';
-import CreatePromptForm from '../../../components/CreatePromptForm';
+import CreatePromptFormNew from '../../../components/CreatePromptFormNew';
 
 export default function MyPromptsPage() {
   const [user, setUser] = useState<any>(null);
@@ -52,7 +52,7 @@ export default function MyPromptsPage() {
       </header>
 
       <div className="mb-6">
-        <CreatePromptForm onSaved={handleSaved} />
+        <CreatePromptFormNew onSaved={handleSaved} />
       </div>
 
       {loading && <div className="text-gray-400">Loading...</div>}

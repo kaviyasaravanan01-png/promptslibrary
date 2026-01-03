@@ -8,6 +8,7 @@ import PromptReviewSection from '../../../components/PromptReviewSection';
 import PromptText from '../../../components/PromptText';
 import CopyAndOpenButtons from '../../../components/CopyAndOpenButtons';
 import MediaGallery from '../../../components/MediaGallery';
+import MediaGalleryWithPrompts from '../../../components/MediaGalleryWithPrompts';
 import CategoryList from '../../../components/CategoryList';
 
 type CatDisplay = { category?: any; subcategory?: any; subsub?: any };
@@ -31,7 +32,7 @@ export default async function PromptPage({ params }: Props) {
 
   const { data, error } = await supabase
     .from('prompts')
-    .select('id,slug,title,description,model,result_urls,is_premium,price,created_by,status,requirements,instructions,seo_title,seo_description,trusted,tags')
+    .select('id,slug,title,description,model,prompt_template,result_urls,is_premium,price,created_by,status,requirements,instructions,seo_title,seo_description,trusted,tags')
     .eq('slug', slug)
     .single();
 
@@ -47,9 +48,30 @@ export default async function PromptPage({ params }: Props) {
       </div>
     );
   }
+  
+  // Try to fetch results from new prompt_results table, fallback to result_urls
+  let results = data.result_urls || [];
+  try {
+    const { data: promptResults } = await supabase
+      .from('prompt_results')
+      .select('*')
+      .eq('prompt_id', data.id)
+      .order('display_order', { ascending: true });
+    
+    if (promptResults && promptResults.length > 0) {
+      results = promptResults;
+    }
+  } catch (err) {
+    // Fallback to result_urls if prompt_results table doesn't exist yet
+    console.log('Could not fetch from prompt_results table, using result_urls');
+  }
   // For approved prompts, do NOT render delete button anywhere in the page.
 
 console.log('data', data);
+  
+  // Check if results have the new structure with prompt descriptions
+  const hasNewResultStructure = Array.isArray(results) && results.length > 0 && 'prompt_description' in results[0];
+
   return (
     <div>
       <header className="flex items-start justify-between">
@@ -83,10 +105,24 @@ console.log('data', data);
         <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <div className="text-sm text-gray-400 mb-2">Preview results below.</div>
-            <MediaGallery items={(data.result_urls || []) as any} />
+            {hasNewResultStructure ? (
+              <MediaGalleryWithPrompts items={results} />
+            ) : (
+              <MediaGallery items={(results || []) as any} />
+            )}
           </div>
           <div>
             <PromptText slug={data.slug} promptId={data.id} isPremium={data.is_premium} price={data.price} model={data.model} />
+            
+            {data.prompt_template && (
+              <div className="mt-4">
+                <h3 className="text-sm font-semibold">Prompt Template</h3>
+                <pre className="mt-2 p-2 bg-black/50 rounded text-xs text-gray-300 overflow-x-auto whitespace-pre-wrap break-words">
+                  {data.prompt_template}
+                </pre>
+              </div>
+            )}
+            
             {Array.isArray(data.requirements) && data.requirements.length > 0 && (
               <div className="mt-4">
                 <h3 className="text-sm font-semibold">Requirements</h3>
